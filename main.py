@@ -2,6 +2,64 @@ import sys
 import urwid
 
 
+class MenuItem(urwid.Padding):
+    """This class represent an item in the menu"""
+
+    def __init__(self, name, callback=None, shortcut=None, **kwargs):
+        self.name = name
+        self.callback = callback
+        self.shortcut = shortcut
+
+        # init the Padding with a Text widget with a border arround it
+        super(MenuItem, self).__init__(
+            urwid.LineBox(
+                urwid.Filler(
+                    urwid.Text(name)
+                )
+            )
+        )
+
+        # add attr according to kwargs.
+        # Used for override Padding attributs
+        for attr_name, attr_value in kwargs.items():
+            setattr(self, attr_name, attr_value)
+
+
+class Menu(urwid.Pile):
+    """Manage a menu"""
+
+    def __init__(self, items=None):
+        # init the Pile with an empty widgets array
+        super(Menu, self).__init__([])
+
+        if items is not None:
+            self.add_items(items=items)
+
+    def add_item(self, item):
+        """Add an item"""
+
+        if type(item) == dict:
+            _item = MenuItem(**item)
+        elif type(item) == MenuItem:
+            _item = item
+        else:
+            raise Exception('Bad object type for a menu item')
+
+        if hasattr(_item, 'height'):
+            self.contents.append((_item, self.options('given', _item.height)))
+        else:
+            self.contents.append((_item, self.options()))
+
+    def add_items(self, items):
+        """Add a list of items in the menu"""
+
+        if items is None:
+            raise Exception('Bad menu items list')
+
+        for item in items:
+            self.add_item(item=item)
+
+
 class TermWindow(urwid.WidgetPlaceholder):
     def __init__(self):
         super(TermWindow, self).__init__(urwid.Pile([]))
@@ -12,11 +70,9 @@ class TermWindow(urwid.WidgetPlaceholder):
     def unhandled_input(self, key):
         if key in ('q', 'Q'):
             raise urwid.ExitMainLoop()
-        else:
-            self.body.set_text(self.body.get_text()[0] + key)
 
     def set_header(self):
-        """"""
+        """Create the header"""
 
         self.header = urwid.Text('SIMSIAC', 'center')
 
@@ -26,14 +82,23 @@ class TermWindow(urwid.WidgetPlaceholder):
         ))
 
     def set_body(self):
-        """"""
+        """Create the body"""
 
-        self.body = urwid.Text('')
+        items = [
+            {'name': '1 - BOUGIE', 'align': 'center', 'width': 42, 'height': 5},
+            {'name': '2 - IS', 'align': 'center', 'width': 42, 'height': 5},
+            {'name': '3 - MAGIC', 'align': 'center', 'width': 42, 'height': 5}
+        ]
+        menu = Menu(items)
 
         self.original_widget.contents.append((
-            urwid.Filler(self.body, 'top'),
+            menu,
             self.original_widget.options()
         ))
+        try:
+            self.original_widget.focus_position = 1
+        except:
+            pass
 
 if __name__ == "__main__":
     term = TermWindow()
