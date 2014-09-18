@@ -59,6 +59,14 @@ class Menu(urwid.Pile):
         for item in items:
             self.add_item(item=item)
 
+    def keypress(self, size, key):
+        """Handle menu key pressed"""
+
+        if key not in ('q', 'Q'):
+            return None
+        else:
+            return key
+
 
 class TermWindow(urwid.Frame):
     def __init__(self):
@@ -96,6 +104,14 @@ class TermWindow(urwid.Frame):
 
         self.contents['body'] = (menu, None)
         self.focus_position = 'body'
+
+    def keypress(self, size, key):
+        """Handle key pressed when body has focus"""
+
+        if hasattr(self.focus, 'keypress'):
+            return self.focus.keypress(size, key)
+        else:
+            return key
 
 if __name__ == "__main__":
     term = TermWindow()
