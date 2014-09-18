@@ -82,11 +82,11 @@ class TermWindow(urwid.Frame):
     def set_header(self):
         """Create the header"""
 
-        self.header = urwid.Text('SIMSIAC', 'center')
+        self.header_content = urwid.Text('SIMSIAC', 'center')
 
         self.contents['header'] = (
             urwid.BoxAdapter(
-                urwid.LineBox(urwid.Filler(self.header)),
+                urwid.LineBox(urwid.Filler(self.header_content)),
                 5
             ),
             None
