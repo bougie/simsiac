@@ -72,10 +72,16 @@ class TermWindow(urwid.Frame):
     """This class manage the whole screen"""
 
     def __init__(self):
-        super(TermWindow, self).__init__(urwid.Widget())
-
+        # init the header part
         self.set_header()
+        # init the body part
         self.set_body()
+
+        # fill frame with all parts
+        super(TermWindow, self).__init__(
+            body=self.body_content,
+            header=self.header_content
+        )
 
     def unhandled_input(self, key):
         if key in ('q', 'Q'):
@@ -84,14 +90,11 @@ class TermWindow(urwid.Frame):
     def set_header(self):
         """Create the header"""
 
-        self.header_content = urwid.Text('SIMSIAC', 'center')
+        self.header_text_content = urwid.Text('SIMSIAC', 'center')
 
-        self.contents['header'] = (
-            urwid.BoxAdapter(
-                urwid.LineBox(urwid.Filler(self.header_content)),
-                5
-            ),
-            None
+        self.header_content = urwid.BoxAdapter(
+            urwid.LineBox(urwid.Filler(self.header_text_content)),
+            5
         )
 
     def set_body(self):
@@ -102,10 +105,7 @@ class TermWindow(urwid.Frame):
             {'name': '2 - IS', 'align': 'center', 'width': 42, 'height': 5},
             {'name': '3 - MAGIC', 'align': 'center', 'width': 42, 'height': 5}
         ]
-        menu = Menu(items)
-
-        self.contents['body'] = (menu, None)
-        self.focus_position = 'body'
+        self.body_content = Menu(items)
 
     def keypress(self, size, key):
         """Handle key pressed when body has focus"""
