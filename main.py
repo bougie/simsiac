@@ -84,6 +84,8 @@ class TermWindow(urwid.Frame):
         )
 
     def unhandled_input(self, key):
+        """Handle unhandled key pressed"""
+
         if key in ('q', 'Q'):
             raise urwid.ExitMainLoop()
 
