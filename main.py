@@ -69,6 +69,8 @@ class Menu(urwid.Pile):
 
 
 class TermWindow(urwid.Frame):
+    """This class manage the whole screen"""
+
     def __init__(self):
         super(TermWindow, self).__init__(urwid.Widget())
 
