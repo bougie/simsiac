@@ -1,5 +1,6 @@
 import sys
 import signal
+import math
 from time import time
 import curses
 
@@ -34,8 +35,7 @@ class Timer():
 class Window():
     """This class manage the display"""
 
-    def __init__(self, args=None):
-        self.args = args
+    def __init__(self):
 
         # Init the curses screen
         self.screen = curses.initscr()
@@ -57,11 +57,13 @@ class Window():
             curses.cbreak()
 
         # init title window
+        self.title = "SIMSIAC"
         self.title_nlines = 5
         self.title_window = self.screen.subwin(
             self.title_nlines, self.screen_x,
             0, 0
         )
+
         # init main window
         self.term_window = self.screen.subwin(
             self.screen_y - self.title_nlines, self.screen_x,
@@ -86,6 +88,11 @@ class Window():
         """Display the title window"""
 
         self.title_window.border('|', '|', '_', '_', ' ', ' ', '|', '|')
+
+        # center title in the title window
+        row_number = int(math.floor(self.title_nlines / 2))
+        col_number = int(math.floor((self.screen_x - len(self.title)) / 2))
+        self.title_window.addstr(row_number, col_number, self.title)
 
     def display_term(self):
         """Display the term (main) window"""
@@ -122,6 +129,7 @@ class Engine():
 
     def serve_forever(self):
         """Main loop"""
+
         while True:
             self.window.update()
 
