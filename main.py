@@ -1,140 +1,44 @@
 import sys
-import signal
-import math
-from time import time
-import curses
+import urwid
 
 
-def __signal_handler(signal, frame):
-    """Callback for CTRL-C"""
-
-    engine.end()
-    sys.exit(0)
-
-
-class Timer():
-    """The timer class. A simple chronometer."""
-
-    def __init__(self, duration):
-        self.duration = duration
-        self.start()
-
-    def start(self):
-        self.target = time() + self.duration
-
-    def reset(self):
-        self.start()
-
-    def set(self, duration):
-        self.duration = duration
-
-    def finished(self):
-        return time() > self.target
-
-
-class Window():
-    """This class manage the display"""
-
+class TermWindow(urwid.WidgetPlaceholder):
     def __init__(self):
+        super(TermWindow, self).__init__(urwid.Pile([]))
 
-        # Init the curses screen
-        self.screen = curses.initscr()
-        if not self.screen:
-            sys.exit(1)
+        self.set_header()
+        self.set_body()
 
-        # init term width / height
-        self.screen_x = self.screen.getmaxyx()[1]  # width
-        self.screen_y = self.screen.getmaxyx()[0]  # height
+    def unhandled_input(self, key):
+        if key in ('q', 'Q'):
+            raise urwid.ExitMainLoop()
+        else:
+            self.body.set_text(self.body.get_text()[0] + key)
 
-        # Set curses options
-        if hasattr(curses, 'start_color'):
-            curses.start_color()
-        if hasattr(curses, 'use_default_colors'):
-            curses.use_default_colors()
-        if hasattr(curses, 'noecho'):
-            curses.noecho()
-        if hasattr(curses, 'cbreak'):
-            curses.cbreak()
+    def set_header(self):
+        """"""
 
-        # init title window
-        self.title = "SIMSIAC"
-        self.title_nlines = 5
-        self.title_window = self.screen.subwin(
-            self.title_nlines, self.screen_x,
-            0, 0
-        )
+        self.header = urwid.Text('SIMSIAC', 'center')
 
-        # init main window
-        self.term_window = self.screen.subwin(
-            self.screen_y - self.title_nlines, self.screen_x,
-            self.title_nlines - 1, 0
-        )
+        self.original_widget.contents.append((
+            urwid.LineBox(urwid.Filler(self.header)),
+            self.original_widget.options('given', 5)
+        ))
 
-    def close(self):
-        """Shutdown the curses window"""
+    def set_body(self):
+        """"""
 
-        if hasattr(curses, 'echo'):
-            curses.echo()
-        if hasattr(curses, 'nocbreak'):
-            curses.nocbreak()
-        if hasattr(curses, 'curs_set'):
-            try:
-                curses.curs_set(1)
-            except Exception:
-                pass
-        curses.endwin()
+        self.body = urwid.Text('')
 
-    def display_title(self):
-        """Display the title window"""
-
-        self.title_window.border('|', '|', '_', '_', ' ', ' ', '|', '|')
-
-        # center title in the title window
-        row_number = int(math.floor(self.title_nlines / 2))
-        col_number = int(math.floor((self.screen_x - len(self.title)) / 2))
-        self.title_window.addstr(row_number, col_number, self.title)
-
-    def display_term(self):
-        """Display the term (main) window"""
-
-        self.term_window.border('|', '|', '_', '_', '|', '|', '|', '|')
-
-    def display(self):
-        self.display_title()
-        self.display_term()
-
-    def flush(self):
-        """Erase the content of the screen"""
-
-        self.title_window.clear()
-        self.term_window.clear()
-        self.display()
-        self.title_window.refresh()
-        self.term_window.refresh()
-
-    def update(self):
-        self.flush()
-
-        countdown = Timer(3)
-        while not countdown.finished():
-            curses.napms(100)
-
-
-class Engine():
-    def __init__(self):
-        self.window = Window()
-
-    def end(self):
-        self.window.close()
-
-    def serve_forever(self):
-        """Main loop"""
-
-        while True:
-            self.window.update()
+        self.original_widget.contents.append((
+            urwid.Filler(self.body, 'top'),
+            self.original_widget.options()
+        ))
 
 if __name__ == "__main__":
-    signal.signal(signal.SIGINT, __signal_handler)
-
-    engine = Engine()
-    engine.serve_forever()
+    term = TermWindow()
+    try:
+        urwid.MainLoop(term, unhandled_input=term.unhandled_input).run()
+    except Exception as e:
+        print(e)
+        sys.exit(1)
