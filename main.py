@@ -60,9 +60,9 @@ class Menu(urwid.Pile):
             self.add_item(item=item)
 
 
-class TermWindow(urwid.WidgetPlaceholder):
+class TermWindow(urwid.Frame):
     def __init__(self):
-        super(TermWindow, self).__init__(urwid.Pile([]))
+        super(TermWindow, self).__init__(urwid.Widget())
 
         self.set_header()
         self.set_body()
@@ -76,10 +76,13 @@ class TermWindow(urwid.WidgetPlaceholder):
 
         self.header = urwid.Text('SIMSIAC', 'center')
 
-        self.original_widget.contents.append((
-            urwid.LineBox(urwid.Filler(self.header)),
-            self.original_widget.options('given', 5)
-        ))
+        self.contents['header'] = (
+            urwid.BoxAdapter(
+                urwid.LineBox(urwid.Filler(self.header)),
+                5
+            ),
+            None
+        )
 
     def set_body(self):
         """Create the body"""
@@ -91,14 +94,8 @@ class TermWindow(urwid.WidgetPlaceholder):
         ]
         menu = Menu(items)
 
-        self.original_widget.contents.append((
-            menu,
-            self.original_widget.options()
-        ))
-        try:
-            self.original_widget.focus_position = 1
-        except:
-            pass
+        self.contents['body'] = (menu, None)
+        self.focus_position = 'body'
 
 if __name__ == "__main__":
     term = TermWindow()
