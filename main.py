@@ -28,12 +28,35 @@ class MenuItem(urwid.Padding):
 class Menu(urwid.Pile):
     """Manage a menu"""
 
-    def __init__(self, items=None):
+    def __init__(self, items=None, max_w=0, max_h=0):
+        # max width  of widget
+        self.max_w = max_w
+        # max hight  of widget
+        self.max_h = max_h
+
         # init the Pile with an empty widgets array
         super(Menu, self).__init__([])
 
         if items is not None:
             self.add_items(items=items)
+
+    @property
+    def max_w(self):
+        return self.__max_w
+
+    @max_w.setter
+    def max_w(self, value):
+        if value > 0:
+            self.__max_w = value
+
+    @property
+    def max_h(self):
+        return self.__max_h
+
+    @max_h.setter
+    def max_h(self, value):
+        if value > 0:
+            self.__max_h = value
 
     def add_item(self, item):
         """Add an item"""
@@ -46,7 +69,10 @@ class Menu(urwid.Pile):
             raise Exception('Bad object type for a menu item')
 
         if hasattr(_item, 'height'):
-            self.contents.append((_item, self.options('given', _item.height)))
+            if self.rows((self.max_w,)) + _item.height < self.max_h:
+                self.contents.append(
+                    (_item, self.options('given', _item.height))
+                )
         else:
             self.contents.append((_item, self.options()))
 
@@ -71,9 +97,9 @@ class Menu(urwid.Pile):
 class TermWindow(urwid.Frame):
     """This class manage the whole screen"""
 
-    def __init__(self):
-        self.__screen_w = 0
-        self.__screen_h = 0
+    def __init__(self, w=0, h=0):
+        self.screen_w = w
+        self.screen_h = h
 
         # init the header part
         self.set_header()
@@ -104,6 +130,29 @@ class TermWindow(urwid.Frame):
         if value > 0:
             self.__screen_h = value
 
+    @property
+    def body_content_max_w(self):
+        """Get body content max width if set,
+        or all the available space if not"""
+
+        if hasattr(self, 'body_content'):
+            return self.body_content.max_w
+        else:
+            # body_content does not exist so return the screen width
+            return self.screen_w
+
+    @property
+    def body_content_max_h(self):
+        """Get body content max hight if set,
+        or all the available space if not"""
+
+        if hasattr(self, 'body_content'):
+            return self.body_content.max_h
+        else:
+            # return the place available for the body content
+            # which equals to : screen height - header hight
+            return self.screen_h - self.header_content.rows((self.screen_w,))
+
     def unhandled_input(self, key):
         """Handle unhandled key pressed"""
 
@@ -129,9 +178,20 @@ class TermWindow(urwid.Frame):
             {'name': '3 - MAGIC', 'align': 'center', 'width': 42, 'height': 5},
             {'name': '4 - ALL', 'align': 'center', 'width': 42, 'height': 5},
             {'name': '5 - THE', 'align': 'center', 'width': 42, 'height': 5},
-            {'name': '6 - TIME', 'align': 'center', 'width': 42, 'height': 5}
+            {'name': '6 - TIME', 'align': 'center', 'width': 42, 'height': 5},
+            {'name': '7 - TIME', 'align': 'center', 'width': 42, 'height': 5},
+            {'name': '8 - TIME', 'align': 'center', 'width': 42, 'height': 5},
+            {'name': '9 - TIME', 'align': 'center', 'width': 42, 'height': 5},
+            {'name': '10 - TIME', 'align': 'center', 'width': 42, 'height': 5},
+            {'name': '11 - TIME', 'align': 'center', 'width': 42, 'height': 5},
+            {'name': '12 - TIME', 'align': 'center', 'width': 42, 'height': 5},
+            {'name': '13 - TIME', 'align': 'center', 'width': 42, 'height': 5}
         ]
-        self.body_content = Menu(items)
+        self.body_content = Menu(
+            max_w=self.body_content_max_w,
+            max_h=self.body_content_max_h
+        )
+        self.body_content.add_items(items)
 
     def keypress(self, size, key):
         """Handle key pressed when body has focus"""
@@ -142,12 +202,21 @@ class TermWindow(urwid.Frame):
             return key
 
 if __name__ == "__main__":
-    term = TermWindow()
-    try:
-        main = urwid.MainLoop(term, unhandled_input=term.unhandled_input)
-        term.screen_w = main.screen.get_cols_rows()[0]
-        term.screen_h = main.screen.get_cols_rows()[1]
+    # init screen use to display "things"
+    screen = urwid.raw_display.Screen()
 
+    # create the terminal window
+    term = TermWindow(
+        w=screen.get_cols_rows()[0],
+        h=screen.get_cols_rows()[1]
+    )
+
+    try:
+        main = urwid.MainLoop(
+            term,
+            screen=screen,
+            unhandled_input=term.unhandled_input
+        )
         main.run()
     except Exception as e:
         print(e)
