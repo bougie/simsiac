@@ -72,6 +72,9 @@ class TermWindow(urwid.Frame):
     """This class manage the whole screen"""
 
     def __init__(self):
+        self.__screen_w = 0
+        self.__screen_h = 0
+
         # init the header part
         self.set_header()
         # init the body part
@@ -82,6 +85,24 @@ class TermWindow(urwid.Frame):
             body=self.body_content,
             header=self.header_content
         )
+
+    @property
+    def screen_w(self):
+        return self.__screen_w
+
+    @screen_w.setter
+    def screen_w(self, value):
+        if value > 0:
+            self.__screen_w = value
+
+    @property
+    def screen_h(self):
+        return self.__screen_h
+
+    @screen_h.setter
+    def screen_h(self, value):
+        if value > 0:
+            self.__screen_h = value
 
     def unhandled_input(self, key):
         """Handle unhandled key pressed"""
@@ -124,6 +145,9 @@ if __name__ == "__main__":
     term = TermWindow()
     try:
         main = urwid.MainLoop(term, unhandled_input=term.unhandled_input)
+        term.screen_w = main.screen.get_cols_rows()[0]
+        term.screen_h = main.screen.get_cols_rows()[1]
+
         main.run()
     except Exception as e:
         print(e)
