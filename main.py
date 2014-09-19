@@ -105,7 +105,10 @@ class TermWindow(urwid.Frame):
         items = [
             {'name': '1 - BOUGIE', 'align': 'center', 'width': 42, 'height': 5},
             {'name': '2 - IS', 'align': 'center', 'width': 42, 'height': 5},
-            {'name': '3 - MAGIC', 'align': 'center', 'width': 42, 'height': 5}
+            {'name': '3 - MAGIC', 'align': 'center', 'width': 42, 'height': 5},
+            {'name': '4 - ALL', 'align': 'center', 'width': 42, 'height': 5},
+            {'name': '5 - THE', 'align': 'center', 'width': 42, 'height': 5},
+            {'name': '6 - TIME', 'align': 'center', 'width': 42, 'height': 5}
         ]
         self.body_content = Menu(items)
 
@@ -120,7 +123,8 @@ class TermWindow(urwid.Frame):
 if __name__ == "__main__":
     term = TermWindow()
     try:
-        urwid.MainLoop(term, unhandled_input=term.unhandled_input).run()
+        main = urwid.MainLoop(term, unhandled_input=term.unhandled_input)
+        main.run()
     except Exception as e:
         print(e)
         sys.exit(1)
