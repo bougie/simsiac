@@ -135,10 +135,13 @@ class Menu(urwid.Pile):
             opts = self.get_item_options(item=_item)
 
             self.contents.insert(0, (_item, opts))
-            self.contents.pop()
 
-            # change the last item id which will be displayed
-            self.last_item -= 1
+            # remove the last item on screen
+            # until all block can't be totally displayed
+            while self.rows((self.max_w,)) > self.max_h:
+                self.contents.pop()
+                # change the last item id which will be displayed
+                self.last_item -= 1
 
     def scroll_down(self):
         """Scroll the menu to the bottom"""
@@ -152,10 +155,13 @@ class Menu(urwid.Pile):
             opts = self.get_item_options(item=_item)
 
             self.contents.append((_item, opts))
-            self.contents.remove(self.contents[0])
 
-            # change the first item id which will be displayed
-            self.first_item += 1
+            # remove the first item on screen
+            # until all block can't be totally displayed
+            while self.rows((self.max_w,)) > self.max_h:
+                self.contents.remove(self.contents[0])
+                # change the first item id which will be displayed
+                self.first_item += 1
 
 
 class TermWindow(urwid.Frame):
