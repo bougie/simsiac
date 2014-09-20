@@ -80,12 +80,11 @@ class Menu(urwid.Pile):
 
         if hasattr(_item, 'height'):
             if (len(self._items) == len(self.contents)
-                    and self.rows((self.max_w,)) + _item.height < self.max_h):
+                    and self.rows((self.max_w,)) + _item.height <= self.max_h):
                 self.contents.append((_item, opts))
                 self.last_item = len(self.contents) - 1
         else:
-            self.contents.append((_item, self.options()))
-            self.last_item = len(self.contents) - 1
+            raise Exception('Object does not have a height')
 
         self._items.append(_item)
 
@@ -137,7 +136,7 @@ class Menu(urwid.Pile):
 
             # remove the last item on screen
             # until all block can't be totally displayed
-            while self.rows((self.max_w,)) > self.max_h:
+            while self.rows((self.max_w,)) >= self.max_h:
                 self.contents.pop()
                 # change the last item id which will be displayed
                 self.last_item -= 1
@@ -157,7 +156,7 @@ class Menu(urwid.Pile):
 
             # remove the first item on screen
             # until all block can't be totally displayed
-            while self.rows((self.max_w,)) > self.max_h:
+            while self.rows((self.max_w,)) >= self.max_h:
                 self.contents.remove(self.contents[0])
                 # change the first item id which will be displayed
                 self.first_item += 1
