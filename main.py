@@ -29,10 +29,18 @@ class Menu(urwid.Pile):
     """Manage a menu"""
 
     def __init__(self, items=None, max_w=0, max_h=0):
-        # max width  of widget
+        # max width of widget
         self.max_w = max_w
-        # max hight  of widget
+        # max hight of widget
         self.max_h = max_h
+
+        # first item ID which is displayed on screen
+        self.first_item = 0
+        # last item ID which is displayed on screen
+        self.last_item = 0
+
+        # list of all items in the menu (displayed or not)
+        self._items = []
 
         # init the Pile with an empty widgets array
         super(Menu, self).__init__([])
@@ -68,13 +76,18 @@ class Menu(urwid.Pile):
         else:
             raise Exception('Bad object type for a menu item')
 
+        self._items.append(_item)
+
         if hasattr(_item, 'height'):
             if self.rows((self.max_w,)) + _item.height < self.max_h:
                 self.contents.append(
                     (_item, self.options('given', _item.height))
                 )
+
+                self.last_item = len(self.contents) - 1
         else:
             self.contents.append((_item, self.options()))
+            self.last_item = len(self.contents) - 1
 
     def add_items(self, items):
         """Add a list of items in the menu"""
@@ -85,13 +98,63 @@ class Menu(urwid.Pile):
         for item in items:
             self.add_item(item=item)
 
+    def get_item_options(self, item):
+        """Get options associated to the item according of his parameters"""
+
+        if hasattr(item, 'height'):
+            opts = self.options('given', item.height)
+        else:
+            opts = self.options()
+
+        return opts
+
     def keypress(self, size, key):
         """Handle menu key pressed"""
 
-        if key not in ('q', 'Q'):
-            return None
+        if key in ('q', 'Q'):
+            return key
+
+        if key == 'up':
+            self.scroll_up()
+        elif key == 'down':
+            self.scroll_down()
         else:
             return key
+
+        return None
+
+    def scroll_up(self):
+        """Scroll the menu to the top"""
+
+        if self.first_item > 0 and self.last_item < len(self._items):
+            # change the first item id which will be displayed
+            self.first_item -= 1
+
+            _item = self._items[self.first_item]
+            opts = self.get_item_options(item=_item)
+
+            self.contents.insert(0, (_item, opts))
+            self.contents.pop()
+
+            # change the last item id which will be displayed
+            self.last_item -= 1
+
+    def scroll_down(self):
+        """Scroll the menu to the bottom"""
+
+        if self.first_item < len(self._items) - len(self.contents):
+            # change the last item id which will be displayed
+            self.last_item += 1
+
+            # item and item's options to add
+            _item = self._items[self.last_item]
+            opts = self.get_item_options(item=_item)
+
+            self.contents.append((_item, opts))
+            self.contents.remove(self.contents[0])
+
+            # change the first item id which will be displayed
+            self.first_item += 1
 
 
 class TermWindow(urwid.Frame):
