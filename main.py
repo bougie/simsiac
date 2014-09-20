@@ -77,11 +77,15 @@ class Menu(urwid.Pile):
             raise Exception('Bad object type for a menu item')
 
         if hasattr(_item, 'height'):
+            # no item is not displayed
+            # and it can be displayed
             if (len(self._items) == len(self.contents)
                     and self.rows((self.max_w,)) + _item.height <= self.max_h):
                 self.contents.append((_item, self.get_item_options(item=_item)))
                 self.last_item = len(self.contents) - 1
 
+            # add item in the items list
+            # even if it can't be displayed at this moment
             self._items.append(_item)
         else:
             raise Exception('Object does not have a height')
