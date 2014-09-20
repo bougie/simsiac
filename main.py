@@ -76,18 +76,19 @@ class Menu(urwid.Pile):
         else:
             raise Exception('Bad object type for a menu item')
 
-        self._items.append(_item)
-
         if hasattr(_item, 'height'):
-            if self.rows((self.max_w,)) + _item.height < self.max_h:
-                self.contents.append(
-                    (_item, self.options('given', _item.height))
-                )
+            if len(self._items) == len(self.contents):
+                if self.rows((self.max_w,)) + _item.height < self.max_h:
+                    self.contents.append(
+                        (_item, self.options('given', _item.height))
+                    )
 
-                self.last_item = len(self.contents) - 1
+                    self.last_item = len(self.contents) - 1
         else:
             self.contents.append((_item, self.options()))
             self.last_item = len(self.contents) - 1
+
+        self._items.append(_item)
 
     def add_items(self, items):
         """Add a list of items in the menu"""
@@ -236,19 +237,19 @@ class TermWindow(urwid.Frame):
         """Create the body"""
 
         items = [
-            {'name': '1 - BOUGIE', 'align': 'center', 'width': 42, 'height': 5},
+            {'name': '1 - BOUGIE', 'align': 'center', 'width': 42, 'height': 3},
             {'name': '2 - IS', 'align': 'center', 'width': 42, 'height': 5},
-            {'name': '3 - MAGIC', 'align': 'center', 'width': 42, 'height': 5},
+            {'name': '3 - MAGIC', 'align': 'center', 'width': 42, 'height': 7},
             {'name': '4 - ALL', 'align': 'center', 'width': 42, 'height': 5},
-            {'name': '5 - THE', 'align': 'center', 'width': 42, 'height': 5},
-            {'name': '6 - TIME', 'align': 'center', 'width': 42, 'height': 5},
-            {'name': '7 - TIME', 'align': 'center', 'width': 42, 'height': 5},
-            {'name': '8 - TIME', 'align': 'center', 'width': 42, 'height': 5},
-            {'name': '9 - TIME', 'align': 'center', 'width': 42, 'height': 5},
-            {'name': '10 - TIME', 'align': 'center', 'width': 42, 'height': 5},
-            {'name': '11 - TIME', 'align': 'center', 'width': 42, 'height': 5},
+            {'name': '5 - THE', 'align': 'center', 'width': 42, 'height': 3},
+            {'name': '6 - TIME', 'align': 'center', 'width': 42, 'height': 3},
+            {'name': '7 - TIME', 'align': 'center', 'width': 42, 'height': 4},
+            {'name': '8 - TIME', 'align': 'center', 'width': 42, 'height': 9},
+            {'name': '9 - TIME', 'align': 'center', 'width': 42, 'height': 9},
+            {'name': '10 - TIME', 'align': 'center', 'width': 42, 'height': 3},
+            {'name': '11 - TIME', 'align': 'center', 'width': 42, 'height': 3},
             {'name': '12 - TIME', 'align': 'center', 'width': 42, 'height': 5},
-            {'name': '13 - TIME', 'align': 'center', 'width': 42, 'height': 5}
+            {'name': '13 - TIME', 'align': 'center', 'width': 42, 'height': 9}
         ]
         self.body_content = Menu(
             max_w=self.body_content_max_w,
