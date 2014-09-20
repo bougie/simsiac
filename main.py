@@ -76,14 +76,13 @@ class Menu(urwid.Pile):
         else:
             raise Exception('Bad object type for a menu item')
 
-        if hasattr(_item, 'height'):
-            if len(self._items) == len(self.contents):
-                if self.rows((self.max_w,)) + _item.height < self.max_h:
-                    self.contents.append(
-                        (_item, self.options('given', _item.height))
-                    )
+        opts = self.get_item_options(item=_item)
 
-                    self.last_item = len(self.contents) - 1
+        if hasattr(_item, 'height'):
+            if (len(self._items) == len(self.contents)
+                    and self.rows((self.max_w,)) + _item.height < self.max_h):
+                self.contents.append((_item, opts))
+                self.last_item = len(self.contents) - 1
         else:
             self.contents.append((_item, self.options()))
             self.last_item = len(self.contents) - 1
