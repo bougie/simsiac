@@ -166,7 +166,7 @@ class Menu(urwid.Pile):
                 _item = self._items[self.first_item]
                 opts = self.get_item_options(item=_item)
 
-                # add item ahile there is available place on screen
+                # add item while there is available place on screen
                 if self.rows((self.max_w,)) + _item.height <= self.max_h:
                     self.contents.insert(0, (_item, opts))
 
@@ -175,6 +175,7 @@ class Menu(urwid.Pile):
                     else:
                         break
                 else:
+                    self.first_item += 1
                     break
 
     def scroll_down(self):
@@ -220,6 +221,7 @@ class Menu(urwid.Pile):
                     else:
                         break
                 else:
+                    self.last_item -= 1
                     break
 
 
