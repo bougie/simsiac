@@ -28,7 +28,7 @@ class MenuItem(urwid.Padding):
 class Menu(urwid.Pile):
     """Manage a menu"""
 
-    def __init__(self, items=None, max_w=0, max_h=0):
+    def __init__(self, items=None, max_w=0, max_h=0, scroll_type='page'):
         # max width of widget
         self.max_w = max_w
         # max hight of widget
@@ -41,6 +41,9 @@ class Menu(urwid.Pile):
 
         # list of all items in the menu (displayed or not)
         self._items = []
+
+        # how to scroll menu item (list for item one by one or page)
+        self.scroll_type = scroll_type
 
         # init the Pile with an empty widgets array
         super(Menu, self).__init__([])
@@ -116,9 +119,15 @@ class Menu(urwid.Pile):
             return key
 
         if key == 'up':
-            self.scroll_up()
+            if self.scroll_type == 'list':
+                self.scroll_up()
+            elif self.scroll_type == 'page':
+                self.scroll_page_up()
         elif key == 'down':
-            self.scroll_down()
+            if self.scroll_type == 'list':
+                self.scroll_down()
+            elif self.scroll_type == 'page':
+                self.scroll_page_down()
         else:
             return key
 
@@ -143,6 +152,31 @@ class Menu(urwid.Pile):
                 # change the last item id which will be displayed
                 self.last_item -= 1
 
+    def scroll_page_up(self):
+        """Scroll the manu to the bottom by a page"""
+
+        # set the last previous item will displayed
+        if self.first_item > 0:
+            self.first_item -= 1
+            self.last_item = self.first_item
+
+            del self.contents[:]
+
+            while True:
+                _item = self._items[self.first_item]
+                opts = self.get_item_options(item=_item)
+
+                # add item ahile there is available place on screen
+                if self.rows((self.max_w,)) + _item.height <= self.max_h:
+                    self.contents.insert(0, (_item, opts))
+
+                    if self.first_item > 0:
+                        self.first_item -= 1
+                    else:
+                        break
+                else:
+                    break
+
     def scroll_down(self):
         """Scroll the menu to the bottom"""
 
@@ -162,6 +196,31 @@ class Menu(urwid.Pile):
                 self.contents.remove(self.contents[0])
                 # change the first item id which will be displayed
                 self.first_item += 1
+
+    def scroll_page_down(self):
+        """Scroll the manu to the bottom by a page"""
+
+        # set the first next item will displayed
+        if self.last_item < len(self._items) - 1:
+            self.last_item += 1
+            self.first_item = self.last_item
+
+            del self.contents[:]
+
+            while True:
+                _item = self._items[self.last_item]
+                opts = self.get_item_options(item=_item)
+
+                # add item ahile there is available place on screen
+                if self.rows((self.max_w,)) + _item.height <= self.max_h:
+                    self.contents.append((_item, opts))
+
+                    if self.last_item < len(self._items) - 1:
+                        self.last_item += 1
+                    else:
+                        break
+                else:
+                    break
 
 
 class TermWindow(urwid.Frame):
