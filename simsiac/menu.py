@@ -27,7 +27,15 @@ class MenuItem(urwid.Padding):
 class Menu(urwid.Pile):
     """Manage a menu"""
 
-    def __init__(self, items=None, max_w=0, max_h=0, scroll_type='page'):
+    def __init__(self,
+                 parent,
+                 items=None,
+                 max_w=0,
+                 max_h=0,
+                 scroll_type='page'):
+        # parent widget which contains all widgets
+        self.parent = parent
+
         # max width of widget
         self.max_w = max_w
         # max hight of widget
@@ -105,7 +113,7 @@ class Menu(urwid.Pile):
         for item in self.contents:
             if item[0].shortcut is not None and item[0].shortcut == key:
                 if item[0].callback is not None:
-                    item[0].callback(self)
+                    item[0].callback(self.parent)
 
                 return None
 
