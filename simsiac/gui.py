@@ -1,4 +1,3 @@
-import sys
 import urwid
 
 from simsiac.menu import Menu
@@ -91,6 +90,7 @@ class TermWindow(urwid.Frame):
             }
         ]
         self.body_content = Menu(
+            self,
             max_w=self.body_content_max_w,
             max_h=self.body_content_max_h
         )
