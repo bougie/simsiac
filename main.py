@@ -102,6 +102,16 @@ class Menu(urwid.Pile):
         for item in items:
             self.add_item(item=item)
 
+    def get_callback(self, key):
+        for item in self.contents:
+            if item[0].shortcut is not None and item[0].shortcut == key:
+                if item[0].callback is not None:
+                    item[0].callback(self)
+
+                return None
+
+        return key
+
     def get_item_options(self, item):
         """Get options associated to the item according of his parameters"""
 
@@ -117,8 +127,7 @@ class Menu(urwid.Pile):
 
         if key in ('q', 'Q'):
             return key
-
-        if key == 'up':
+        elif key == 'up':
             if self.scroll_type == 'list':
                 self.scroll_up()
             elif self.scroll_type == 'page':
@@ -129,7 +138,7 @@ class Menu(urwid.Pile):
             elif self.scroll_type == 'page':
                 self.scroll_page_down()
         else:
-            return key
+            return self.get_callback(key=key)
 
         return None
 
@@ -304,19 +313,14 @@ class TermWindow(urwid.Frame):
         """Create the body"""
 
         items = [
-            {'name': '1 - BOUGIE', 'align': 'center', 'width': 42, 'height': 3},
-            {'name': '2 - IS', 'align': 'center', 'width': 42, 'height': 5},
-            {'name': '3 - MAGIC', 'align': 'center', 'width': 42, 'height': 7},
-            {'name': '4 - ALL', 'align': 'center', 'width': 42, 'height': 5},
-            {'name': '5 - THE', 'align': 'center', 'width': 42, 'height': 3},
-            {'name': '6 - TIME', 'align': 'center', 'width': 42, 'height': 3},
-            {'name': '7 - TIME', 'align': 'center', 'width': 42, 'height': 4},
-            {'name': '8 - TIME', 'align': 'center', 'width': 42, 'height': 9},
-            {'name': '9 - TIME', 'align': 'center', 'width': 42, 'height': 9},
-            {'name': '10 - TIME', 'align': 'center', 'width': 42, 'height': 3},
-            {'name': '11 - TIME', 'align': 'center', 'width': 42, 'height': 3},
-            {'name': '12 - TIME', 'align': 'center', 'width': 42, 'height': 5},
-            {'name': '13 - TIME', 'align': 'center', 'width': 42, 'height': 9}
+            {
+                'name': '01 - Informations',
+                'align': 'center',
+                'width': 42,
+                'height': 3,
+                'shortcut': '1',
+                'callback': m1_callback
+            }
         ]
         self.body_content = Menu(
             max_w=self.body_content_max_w,
@@ -331,6 +335,12 @@ class TermWindow(urwid.Frame):
             return self.focus.keypress(size, key)
         else:
             return key
+
+
+def m1_callback(menu):
+    print("menu_max_w=" + str(menu.max_w))
+    print("menu_max_h=" + str(menu.max_h))
+
 
 if __name__ == "__main__":
     # init screen use to display "things"
