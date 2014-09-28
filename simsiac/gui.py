@@ -1,51 +1,34 @@
 import urwid
 
-from simsiac.menu import Menu
-
 
 class TermWindow(urwid.Frame):
     """This class manage the whole screen"""
 
-    def __init__(self, w=0, h=0):
-        self.screen_w = w
-        self.screen_h = h
-
-        # init the header part
-        self.set_header()
-        # init the body part
-        self.set_body()
+    def __init__(self):
+        self.screen = urwid.raw_display.Screen()
 
         # fill frame with all parts
         super(TermWindow, self).__init__(
-            body=self.body_content,
-            header=self.header_content
+            body=None,
+            header=None,
+            focus_part='body'
         )
 
     @property
     def screen_w(self):
-        return self.__screen_w
-
-    @screen_w.setter
-    def screen_w(self, value):
-        if value > 0:
-            self.__screen_w = value
+        return self.screen.get_cols_rows()[0]
 
     @property
     def screen_h(self):
-        return self.__screen_h
-
-    @screen_h.setter
-    def screen_h(self, value):
-        if value > 0:
-            self.__screen_h = value
+        return self.screen.get_cols_rows()[1]
 
     @property
     def body_content_max_w(self):
         """Get body content max width if set,
         or all the available space if not"""
 
-        if hasattr(self, 'body_content'):
-            return self.body_content.max_w
+        if self.main_body is not None:
+            return self.main_body.max_w
         else:
             # body_content does not exist so return the screen width
             return self.screen_w
@@ -55,12 +38,15 @@ class TermWindow(urwid.Frame):
         """Get body content max hight if set,
         or all the available space if not"""
 
-        if hasattr(self, 'body_content'):
-            return self.body_content.max_h
-        else:
+        if self.main_body is not None:
+            return self.main_body.max_h
+        elif self.main_header is not None:
             # return the place available for the body content
             # which equals to : screen height - header hight
-            return self.screen_h - self.header_content.rows((self.screen_w,))
+            return self.screen_h - self.main_header.rows((self.screen_w,))
+        else:
+            # no header so full place available
+            return self.screen_h
 
     def unhandled_input(self, key):
         """Handle unhandled key pressed"""
@@ -68,33 +54,35 @@ class TermWindow(urwid.Frame):
         if key in ('q', 'Q'):
             raise urwid.ExitMainLoop()
 
-    def set_header(self):
-        """Create the header"""
+    @property
+    def main_header(self):
+        """Get header widget"""
 
-        self.header_text_content = urwid.Text('SIMSIAC', 'center')
+        try:
+            return self.contents['header'][0]
+        except:
+            return None
 
-        self.header_content = urwid.BoxAdapter(
-            urwid.LineBox(urwid.Filler(self.header_text_content)),
-            5
-        )
+    @main_header.setter
+    def main_header(self, value):
+        """Set header widget"""
 
-    def set_body(self):
-        """Create the body"""
+        self.contents['header'] = (value, self.options())
 
-        items = [
-            {
-                'name': '01 - Informations',
-                'align': 'center',
-                'width': 42,
-                'height': 3
-            }
-        ]
-        self.body_content = Menu(
-            self,
-            max_w=self.body_content_max_w,
-            max_h=self.body_content_max_h
-        )
-        self.body_content.add_items(items)
+    @property
+    def main_body(self):
+        """Get body widget"""
+
+        try:
+            return self.contents['body'][0]
+        except:
+            return None
+
+    @main_body.setter
+    def main_body(self, value):
+        """Set body widget"""
+
+        self.contents['body'] = (value, self.options())
 
     def keypress(self, size, key):
         """Handle key pressed when body has focus"""

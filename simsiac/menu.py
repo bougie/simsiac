@@ -1,3 +1,5 @@
+import os
+import glob
 import urwid
 
 
@@ -239,3 +241,58 @@ class Menu(urwid.Pile):
                 else:
                     self.last_item -= 1
                     break
+
+
+def generate_application_menu(term):
+    """load the main menu"""
+
+    items = get_menu_items()
+
+    menu = Menu(
+        term,
+        max_w=term.body_content_max_w,
+        max_h=term.body_content_max_h
+    )
+    menu.add_items(items=items)
+
+    term.main_body = menu
+
+
+def get_menu_items():
+    """Get the list of all menu items"""
+
+    items = []
+
+    files = glob.glob(
+        os.path.dirname(os.path.realpath(__file__)) + '/../application/*.py'
+    )
+    for import_path in files:
+        import_file = os.path.splitext(os.path.basename(import_path))[0]
+        if import_file not in ('__init__'):
+            try:
+                items.append(get_menu_item(import_file))
+            except Exception as e:
+                print(e)
+                pass
+
+    return items
+
+
+def get_menu_item(import_app):
+    exec("import application.%s as %s" % (import_app, import_app))
+    app = locals()[import_app]
+
+    # init item with mandatory variables
+    item = {
+        'name': app._name,
+        'callback': app._callback,
+        'shortcut': app._shortcut,
+        'height': app._height
+    }
+
+    # add optional variables to item
+    for attr in ['width', 'align']:
+        if hasattr(app, '_' + attr):
+            item[attr] = getattr(app, '_' + attr)
+
+    return item

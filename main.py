@@ -2,25 +2,47 @@ import sys
 import urwid
 
 from simsiac.gui import TermWindow
+from simsiac.menu import generate_application_menu
+
+
+class Engine:
+    def __init__(self):
+        # create the terminal window
+        self.term = TermWindow()
+
+    def set_header(self):
+        """Create the header"""
+
+        header_text_content = urwid.Text('SIMSIAC', 'center')
+        self.term.main_header = urwid.BoxAdapter(
+            urwid.LineBox(urwid.Filler(header_text_content)),
+            5
+        )
+
+    def load_main_application(self):
+        self.set_header()
+
+        try:
+            generate_application_menu(self.term)
+        except Exception as e:
+            print(e)
+            sys.exit(1)
+
+    def run_forever(self):
+        try:
+            main = urwid.MainLoop(
+                self.term,
+                screen=self.term.screen,
+                unhandled_input=self.term.unhandled_input
+            )
+            main.run()
+        except Exception as e:
+            print(e)
+            sys.exit(1)
 
 
 if __name__ == "__main__":
-    # init screen use to display "things"
-    screen = urwid.raw_display.Screen()
+    engine = Engine()
 
-    # create the terminal window
-    term = TermWindow(
-        w=screen.get_cols_rows()[0],
-        h=screen.get_cols_rows()[1]
-    )
-
-    try:
-        main = urwid.MainLoop(
-            term,
-            screen=screen,
-            unhandled_input=term.unhandled_input
-        )
-        main.run()
-    except Exception as e:
-        print(e)
-        sys.exit(1)
+    engine.load_main_application()
+    engine.run_forever()
